@@ -1,9 +1,47 @@
 // // edit this first line and call it whatever you want. overwrite document.createElement for all I car.
 // // actually maybe that will be a nice upgrade. grab original createElement for safe keeping. if type is string, just call createElement. But I'll keep the two separate for now, and call mixint.createElement to be verbose that I'm doing something different
+Object.defineProperty(HTMLElement.prototype, 'props', {
+    get(){
+        let props = Array.from(this.attributes, attr => ({
+            [attr.name]: attr.value
+        })).reduce((a, n) => Object.assign(a, n),{}) // You would think you could do .reduce(Object.assign), but assign is variadic, and reduce passes the original array as the 4th argument to its callback, so you would get the original numeric keys in your result if you passed all 4 arguments of reduce to Object.assign. So, explicitely pass just 2 arguments, accumulator and next.
+        
+        return new Proxy(props, {
+            set: (obj, prop, value) => {
+                value ? this.setAttribute(prop, value) : this.removeAttribute(prop)
+                return true
+            },
+            get: (target, name) => {
+                return this.getAttribute(name.toLowerCase())
+            }
+        })
+    },
+    set(data){
+        if(!data) return null // exit in the case of this.props = this.options, but options was undefined
+        if(typeof data != 'object') throw new Error("Set props requires an object to update from")
+        Object.keys(data).forEach(key => {
+            // handle depth-1 nested objects, if a prop is an object, stringify it, I can parse it when I see it change like all the rest in attributeChangedCallback
+            this.setAttribute(key, typeof data[key] == 'object' ? JSON.stringify(data[key]) : data[key])
+        })
+        return this.props
+    }
+})
+// maybe call it mixinquery
+// you can just set children like this.child.footer = {textContent: 'goodbye'}
+// and it creates a node for you! why not? maybe giving too much freedom? getting too far away from familar DOM api? hmmm maybe
+// maybe I'll define a child property that lets you grab a descendent by the tagName
+// kind of like the best of both getElementById and getElementsByTagName
+// don't have to think too much ahead of time except to keep your tagNames unique
+// and hey they'll all have a props to set, nifty
+
 window.mixint = {
     createElement(graph){
+        if(!graph) throw new Error("You didn't give me a graph to work with")
+        if(graph.constructor == String){
+            // document.createElement can handle a string just fine you don't need me.
+            return document.createElement(graph)
+        }
         let [ tagName, attrObj ] = Object.entries(graph)[0]
-
         let node = document.createElement(tagName)
         for(var attribute in attrObj){
             let newValue = attrObj[attribute]
@@ -25,6 +63,10 @@ window.mixint = {
                         node.appendChild(child instanceof Element ? child : mixint.createElement(child))
                     })
                     break
+                case 'classList':
+                    Array.isArray(newValue) && newValue.filter(Boolean).forEach(className => {
+                        node.classList.add(className)
+                    })
                 case 'value':
                     // special case for form nodes where setting the value 'attribute' should set the value of the form
                     node.value = newValue
@@ -37,22 +79,3 @@ window.mixint = {
         return node
     }
 }
-// could be nice to return a proxy around the HTMLElement, 
-// or not even around the Element, just put props on it,
-// with some setters and getters
-// so you can merge attribute objects that add children, eventlisteners, all that...
-/* so you could .props = {
-    textContent:
-    addEventListener:
-    value:
-    style:
-    childNodes:
-}
-just being able to update that stuff after defining the object
-and giving that props setters getters option for any element
-not just special classes
-that would be great
-Now whether certain ones get overwritten?
-what if your proxy could define other methods?
-or, nothing stopping you from doing that already, not treating it as a class and so on.
-*/
