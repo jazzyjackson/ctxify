@@ -26,9 +26,7 @@ module.exports = function ctxify(graph, ctx = {}){
  				outerHTML.push(formatAttribute('style', formatStyle(attribute)))
  				break
  			case 'childNodes':
- 				attribute.forEach(child =>
- 					innerHTML.push(ctxify(child, ctx))
- 				)
+ 				innerHTML.push(...attribute.map(child => ctxify(child, ctx)))
  				break
  			default:
  				outerHTML.push(formatAttribute(prop, attribute))
