@@ -1,6 +1,6 @@
-const createElement = require('../createElement.node.js')
+const ctxify = require('../ctxify.node.js')
 const simpleDemoHTMLX = require('./simpledemo.htmlx.json')
 
 console.log(
-	createElement(simpleDemoHTMLX)
+	ctxify(simpleDemoHTMLX)
 )

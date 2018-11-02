@@ -1,63 +1,7 @@
 /**
- * @exports createElement
- * @param {object} graph - the input graph to convert
- * @param {object} context - a context object to access for interplated variables
- */
-
-module.exports = function createElement(graph, ctx){
- 	validateGraph(graph) // throws error if not {element: {attributes}} format
- 	
- 	var [element, props] = Object.entries(graph).pop()
-	var outerHTML = new Array
-	var innerHTML = new Array
-
- 	for(var prop in props){
- 		var attribute = props[prop]
- 		switch(prop){
- 			case 'textContent':
- 				innerHTML.push(attribute)
- 				break
- 			case 'style':
- 				outerHTML.push(formatAttribute('style', formatStyle(attribute)))
- 				break
- 			case 'childNodes':
- 				attribute.forEach((child) => {
- 					innerHTML.push(createElement(child, ctx))
- 				})
- 				break
- 			default:
- 				outerHTML.push(formatAttribute(prop, attribute))
- 		}
-	}
-	return `<${element}${outerHTML.join(' ')}>${innerHTML.join('')}</${element}>`
-}
-
-/**
- * @param {object} style
- * @return {string}
- * Take object of form {width: "100px", height: "50px"}
- * and return a string `width: 100px; height: 50px;`
- */
-function formatStyle(style){
-	return Object.entries(style).map(tuple => 
-		`${tuple.shift()}: ${tuple.shift()}`
-	).join('; ')
-}
-/**
- * @param {string} prop
- * @param {string} attribute
- * @return {string}
- * the leading space is intentional by the way,
- * so space only exists in <tagName> before each attribute
- */
-function formatAttribute(prop, attribute){
-	return ` ${prop}="${attribute}"`
-}
-
-/**
  * @param {object} graph
  */
-function validateGraph(graph, position){
+module.exports = function validateGraph(graph, position){
 	// initialize position if it doesn't already exist in context from previous recursion
 	var position = position || new Array
 
@@ -114,6 +58,3 @@ function validateGraph(graph, position){
 	}
 	position.pop()
 }
- /**
-  * TODO: regex every property text for ${} pattern... or @
-  */
