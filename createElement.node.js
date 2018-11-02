@@ -6,8 +6,7 @@
 
 module.exports = function createElement(graph, ctx){
  	validateGraph(graph) // throws error if not {element: {attributes}} format
- 	// increment indent depth if indent already exists from recursion, or define it with no indent
- 	var indent = typeof indent == 'undefined' ? '' : indent + '\t'
+ 	
  	var [element, props] = Object.entries(graph).pop()
 	var outerHTML = new Array
 	var innerHTML = new Array
@@ -22,13 +21,15 @@ module.exports = function createElement(graph, ctx){
  				outerHTML.push(formatAttribute('style', formatStyle(attribute)))
  				break
  			case 'childNodes':
- 				attribute.forEach(child => innerHTML.push(createElement(child)))
+ 				attribute.forEach((child) => {
+ 					innerHTML.push(createElement(child, ctx))
+ 				})
  				break
  			default:
  				outerHTML.push(formatAttribute(prop, attribute))
  		}
 	}
-	return `${indent}<${element}${outerHTML.join(' ')}>${innerHTML.join('')}</${element}>`
+	return `<${element}${outerHTML.join(' ')}>${innerHTML.join('')}</${element}>`
 }
 
 /**
@@ -56,9 +57,9 @@ function formatAttribute(prop, attribute){
 /**
  * @param {object} graph
  */
-function validateGraph(graph){
+function validateGraph(graph, position){
 	// initialize position if it doesn't already exist in context from previous recursion
-	var position = typeof position == 'undefined' ? new Array : position
+	var position = position || new Array
 
 	var pathify = position => position.length ? position.map(String).join('.') : 'the start'
 	var assertType = (assertee, type) => {
@@ -81,7 +82,7 @@ function validateGraph(graph){
 
 	var validateChildren = children => {
 		assertType(children, Array)
-		children.forEach(validateGraph)
+		children.forEach(child => validateGraph(child, position))
 	}
 
 	assertType(graph, Object)
