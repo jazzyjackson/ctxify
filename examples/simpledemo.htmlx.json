@@ -1,0 +1,23 @@
+{ "div": {
+		"id": 1,
+		"style": {
+			"width": "400px",
+			"height": "200px",
+			"padding": "10px",
+			"border": "1px solid black"
+		},
+		"textContent": "Here is some text that will be displayed.",
+		"childNodes": [
+			{"button": {
+				"id": "button-one",
+				"onclick": "alert(`You've clicked ${this.id}`)",
+				"textContent": "1"
+			}},
+			{"button": {
+				"id": "button-two",
+				"onclick": "alert(`You've clicked ${this.id}`)",
+				"textContent": "2"
+			}}
+		]
+	}
+}
