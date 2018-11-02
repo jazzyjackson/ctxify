@@ -6,34 +6,59 @@
 
 module.exports = function createElement(graph, ctx){
  	validateGraph(graph) // throws error if not {element: {attributes}} format
- 	let [element, props] = Object.entries(graph).pop()
- 	for(var prop in props){
- 		let attribute = props[prop]
- 		let tagName = element
- 		let outerHTML = new Array
- 		let innerHTML = new Array
+ 	// increment indent depth if indent already exists from recursion, or define it with no indent
+ 	var indent = typeof indent == 'undefined' ? '' : indent + '\t'
+ 	var [element, props] = Object.entries(graph).pop()
+	var outerHTML = new Array
+	var innerHTML = new Array
 
+ 	for(var prop in props){
+ 		var attribute = props[prop]
  		switch(prop){
  			case 'textContent':
- 				innerHTML.push(validateTextContent(attribute))
+ 				innerHTML.push(attribute)
  				break
  			case 'style':
- 				outerHTML.push(formatStyle(validateStyle(attribute)))
+ 				outerHTML.push(formatAttribute('style', formatStyle(attribute)))
  				break
  			case 'childNodes':
- 				validateChildren(attribute).forEach(child => innerHTML.push(createElement(child)))
+ 				attribute.forEach(child => innerHTML.push(createElement(child)))
  				break
  			default:
- 				outerHTML.push(formatAttribute(attribute))
+ 				outerHTML.push(formatAttribute(prop, attribute))
  		}
 	}
+	return `${indent}<${element}${outerHTML.join(' ')}>${innerHTML.join('')}</${element}>`
+}
+
+/**
+ * @param {object} style
+ * @return {string}
+ * Take object of form {width: "100px", height: "50px"}
+ * and return a string `width: 100px; height: 50px;`
+ */
+function formatStyle(style){
+	return Object.entries(style).map(tuple => 
+		`${tuple.shift()}: ${tuple.shift()}`
+	).join('; ')
+}
+/**
+ * @param {string} prop
+ * @param {string} attribute
+ * @return {string}
+ * the leading space is intentional by the way,
+ * so space only exists in <tagName> before each attribute
+ */
+function formatAttribute(prop, attribute){
+	return ` ${prop}="${attribute}"`
 }
 
 /**
  * @param {object} graph
  */
 function validateGraph(graph){
-	var position = position || new Array
+	// initialize position if it doesn't already exist in context from previous recursion
+	var position = typeof position == 'undefined' ? new Array : position
 
 	var pathify = position => position.length ? position.map(String).join('.') : 'the start'
 	var assertType = (assertee, type) => {
@@ -41,8 +66,8 @@ function validateGraph(graph){
 			throw new Error(`String, Object, Function, Array are the only accepted types.`)
 		if(!assertee)
 			throw new Error(`At ${pathify(position)}, property must not be falsey.`)
-		if(assertee.constructor != Object)
-			throw new Error(`At ${pathify(position)}, property must be an ${String(type)}.`)
+		if(assertee.constructor != type)
+			throw new Error(`At ${pathify(position)}, property must be an ${type.name}, got the ${assertee.constructor.name} ${String(assertee)}`)
 	}
 	var validateStyle = style => {
 		assertType(style, Object)
@@ -72,7 +97,7 @@ function validateGraph(graph){
 	assertType(props, Object)
 
  	for(var prop in props){
- 		position.push(props[prop])
+ 		position.push(prop)
  		switch(prop){
  			case 'style':
  				validateStyle(props[prop])
@@ -83,7 +108,6 @@ function validateGraph(graph){
  			default:
  				// everything else will just be a string
 				assertType(props[prop], String)
-
  		}
  		position.pop()
 	}
