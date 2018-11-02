@@ -1,10 +1,10 @@
 {
   "name": "ctxify",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Interpolate variables into HTML graph described as JSON - return String for Node.js and HTMLElement in the browser.",
   "main": "ctxify.node.js",
   "scripts": {
-  	"test": "node examples/simpledemo.js && node examples/interpolatedemo.js"
+    "test": "node examples/simpledemo.js && node examples/interpolatedemo.js"
   },
   "repository": "https://github.com/jazzyjackson/ctxify.git",
   "author": "Colten Jackson <jazzyjackson@gmail.com>",
