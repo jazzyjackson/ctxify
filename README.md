@@ -1,7 +1,5 @@
 # ctxify
-## JSON-driven templating library
-### merge context data with HTML represented as JSON graph 
-
+### ctxify(HTML graph, Context object) -> data interpolated into template
 
 Clientside, presents a simple global function that converts deep objects into DOM trees
 
