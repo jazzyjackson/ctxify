@@ -6,7 +6,11 @@ Clientside, presents a simple global function that converts deep objects into DO
 Also every child created from this tree has a props property that offers easy getting and setting of HTML attributes.
 
 ```js
-ctxify({div: {id: 'whateverYouWant', textContent: 'This becomes a text node'}})
+ctxify({div: {
+	id: 'whateverYouWant', 
+	textContent: 'This becomes a text node'
+}})
+// <div id="whateverYouWant"> This becomes a text node </div>
 ```
 
 style can be a string that overwrites any present styleattribute, or key value pairs that are programmatically applied when you assign the object to style.
