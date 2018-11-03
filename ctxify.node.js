@@ -12,6 +12,29 @@ module.exports = function ctxify(graph, ctx = {}){
  	validateGraph(graph) // throws error if not {element: {attributes}} format
  	mergectx = mergectx.bind(ctx)
 
+	/**
+	 * @param {object} style
+	 * @return {string}
+	 * Take object of form {width: "100px", height: "50px"}
+	 * and return a string `width: 100px; height: 50px;`
+	 * These values ARE compatible with {{ }} templating
+	 */
+	function formatStyle(style){
+		return Object.entries(style).map(tuple =>
+			`${mergectx(tuple[0])}: ${mergectx(tuple[1])};`
+		).join(' ')
+	}
+	/**
+	 * @param {string} prop
+	 * @param {string} attribute
+	 * @return {string}
+	 * the leading space is intentional by the way,
+	 * so space only exists in <tagName> before each attribute
+	 */
+	function formatAttribute(prop, attribute){
+		return ` ${mergectx(prop)}="${mergectx(attribute)}"`
+	}
+
  	var [element, props] = Object.entries(graph).pop()
 	var outerHTML = new Array
 	var innerHTML = new Array
@@ -33,27 +56,4 @@ module.exports = function ctxify(graph, ctx = {}){
  		}
 	}
 	return `<${element}${outerHTML.join(' ')}>${innerHTML.join('')}</${element}>`
-}
-
-/**
- * @param {object} style
- * @return {string}
- * Take object of form {width: "100px", height: "50px"}
- * and return a string `width: 100px; height: 50px;`
- * These values ARE compatible with {{ }} templating
- */
-function formatStyle(style){
-	return Object.entries(style).map(tuple =>
-		tuple.map(mergectx).join(': ')
-	).join('; ')
-}
-/**
- * @param {string} prop
- * @param {string} attribute
- * @return {string}
- * the leading space is intentional by the way,
- * so space only exists in <tagName> before each attribute
- */
-function formatAttribute(prop, attribute){
-	return ` ${mergectx(prop)}="${mergectx(attribute)}"`
 }
