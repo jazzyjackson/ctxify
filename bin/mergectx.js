@@ -8,15 +8,15 @@
  * The context object is traversed for the provided key name until it reaches
  * the end of the dot-notation-string OR the new context becomes undefined.
  */
-module.exports = function mergectx(str){
+module.exports = function mergectx(str, ctx){
 	let capture = /{{([a-zA-Z0-9.]+)}}/g
 	let interpolate = (match, captured) => {
-		let ctx = Object.assign({}, this) // copy 'this' context
+		let localctx = Object.assign({}, ctx) // create copy of ctx
 		let keys = captured.split('.')
-		while(keys.length && ctx){
-			ctx = ctx[keys.shift()] 
+		while(keys.length && localctx){
+			localctx = localctx[keys.shift()] 
 		}
-		return ctx
+		return localctx
 	}
 	return str.replace(capture, interpolate)
 }

@@ -10,8 +10,6 @@ let validateGraph = require('./bin/validateGraph')
 
 module.exports = function ctxify(graph, ctx = {}){
  	validateGraph(graph) // throws error if not {element: {attributes}} format
- 	mergectx = mergectx.bind(ctx)
-
 	/**
 	 * @param {object} style
 	 * @return {string}
@@ -21,7 +19,7 @@ module.exports = function ctxify(graph, ctx = {}){
 	 */
 	function formatStyle(style){
 		return Object.entries(style).map(tuple =>
-			`${mergectx(tuple[0])}: ${mergectx(tuple[1])};`
+			`${mergectx(tuple[0], ctx)}: ${mergectx(tuple[1], ctx)};`
 		).join(' ')
 	}
 	/**
@@ -32,7 +30,7 @@ module.exports = function ctxify(graph, ctx = {}){
 	 * so space only exists in <tagName> before each attribute
 	 */
 	function formatAttribute(prop, attribute){
-		return ` ${mergectx(prop)}="${mergectx(attribute)}"`
+		return ` ${mergectx(prop, ctx)}="${mergectx(attribute, ctx)}"`
 	}
 
  	var [element, props] = Object.entries(graph).pop()
@@ -43,7 +41,7 @@ module.exports = function ctxify(graph, ctx = {}){
  		var attribute = props[prop]
  		switch(prop){
  			case 'textContent':
- 				innerHTML.push(mergectx(attribute))
+ 				innerHTML.push(mergectx(attribute, ctx))
  				break
  			case 'style':
  				outerHTML.push(formatAttribute('style', formatStyle(attribute)))
