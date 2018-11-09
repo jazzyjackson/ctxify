@@ -1,6 +1,6 @@
 {
   "name": "ctxify",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Interpolate variables into HTML graph described as JSON - return String for Node.js and HTMLElement in the browser.",
   "main": "ctxify.node.js",
   "scripts": {
