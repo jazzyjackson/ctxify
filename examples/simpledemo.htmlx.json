@@ -8,6 +8,10 @@
 		},
 		"textContent": "Here is some text that will be displayed.",
 		"childNodes": [
+			"filepathtosomeotherfig", <- interpreted as JSON root of a new graph. will be interpoalted in position.
+			{"SomeOtherHTML": {
+				"bundle":"@mixint/someOtherGraphRoot"
+			}},
 			{"button": {
 				"id": "button-one",
 				"onclick": "alert(`You've clicked ${this.id}`)",

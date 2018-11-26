@@ -5,7 +5,7 @@ const assert = require('assert')
  */
 module.exports = function validateGraph(graph, position){
 	// initialize position if it doesn't already exist in context from previous recursion
-	var position = position || new Array	
+	var position = position || new Array
 
 	var pathify = position => {
 		return position.length ? position.map(String).join('.') : 'the start'
@@ -20,7 +20,21 @@ module.exports = function validateGraph(graph, position){
 			`At ${pathify(position)}, property must be a ${type}, got ${String(assertee)}`)
 	}
 
-	var validateStyle = style => {
+	/**
+	 * Inline style is an attribute of a tag, such as:
+	 *
+	 *	 {"div":{
+	 *		"style": {
+	 *			"border": "1px solid black",
+	 *			"background": "white",
+	 *		},
+	 *		"id": "someid",
+	 *		"textContent": "sometext"
+	 *	 }}
+	 *
+	 *   So here style is an object with string keys and string values
+	 */
+	var validateStyleObject = style => {
 		typeEqual(style, 'Object')
 		for(var selector in style){
 			position.push(selector)
@@ -29,6 +43,50 @@ module.exports = function validateGraph(graph, position){
 			position.pop()
 		}
 	}
+
+	/**
+	 * style tag includes a map of selectors to rule pairs:
+	 *
+	 *	 {"style":{
+	 *		"*":{
+	 *			"box-sizing":"border-box",
+	 *		},
+	 *		"#someid": {
+	 *			"border": "1px solid black",
+	 *			"background": "white",
+	 *		},
+	 *	 }}
+	 *
+	 *   So here style is an object with string keys and object values, 
+	 *   each of which can be validated with same function as inline style.
+	 */
+	var validateStyleTag = rules => {
+	 	for(var selector in rules){
+	 		position.push(selector)
+	 		validateStyleObject(rules[selector])
+	 		position.pop()
+		}
+	}
+
+
+	var validateHTMLTag = (props, style) => {
+	 	for(var prop in props){
+	 		position.push(prop)
+	 		switch(prop.toUpperCase()){
+	 			case 'STYLE':
+	 				validateStyleObject(props[prop])
+	 				break
+	 			case 'CHILDNODES':
+	 				validateChildren(props[prop])
+	 				break
+	 			default:
+	 				// everything else will just be a string
+					typeEqual(props[prop], 'String')
+	 		}
+ 			position.pop()
+ 		}
+	}
+
 
 	var validateChildren = children => {
 		typeEqual(children, 'Array')
@@ -47,20 +105,10 @@ module.exports = function validateGraph(graph, position){
 	typeEqual(element, 'String')
 	typeEqual(props, 'Object')
 
- 	for(var prop in props){
- 		position.push(prop)
- 		switch(prop){
- 			case 'style':
- 				validateStyle(props[prop])
- 				break
- 			case 'childNodes':
- 				validateChildren(props[prop])
- 				break
- 			default:
- 				// everything else will just be a string
-				typeEqual(props[prop], 'String')
- 		}
- 		position.pop()
-	}
+	if(element.toUpperCase() == 'STYLE')
+		validateStyleTag(props)
+	else
+		validateHTMLTag(element, props)
+
 	position.pop()
 }
