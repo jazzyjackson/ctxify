@@ -1,6 +1,16 @@
 const ctxify = require('../ctxify.node.js')
-// const styledemo = require('./styledemo.ohtm.json')
+const styledemo = require('./styledemo.ohtm.json')
 
 console.log(
-	ctxify('./examples/styledemo.ohtm.json')
+	ctxify(styledemo, {
+		data: {
+			innerdata: {
+				id: "somethingunique"
+			}
+		},
+		style: {
+			width: 444,
+			height: 222
+		}
+	})
 )

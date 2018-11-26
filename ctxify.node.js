@@ -8,7 +8,7 @@ let validateGraph = require('./bin/validateGraph')
  * @param {object} context - a context object to access for interplated variables
  */
 
-module.exports = function ctxify(graph, ctx = {}){
+module.exports = function ctxify(graph, ctx){
 	// if graph is a string, try to open it, hoping its a JSON file.
 	// boy relative paths will get really screwy, should I do something to resolve them?
 	if(typeof graph == 'string'){
@@ -18,7 +18,8 @@ module.exports = function ctxify(graph, ctx = {}){
 			return `<!-- ${e.toString()} -->`
 		}
 	}
- 	validateGraph(graph) // throws error if not {element: {attributes}} format
+ 	validateGraph(graph) // throws error if not {element: {attributes}} format // maybe validateGraph can replace s
+ 	if(ctx) graph = mergectx(graph, ctx)
 	/**
 	 * @param {object} style
 	 * @return {string}
@@ -28,7 +29,7 @@ module.exports = function ctxify(graph, ctx = {}){
 	 */
 	function formatStyleRules(style, seperator = ' '){
 		return Object.entries(style).map(tuple =>
-			`${mergectx(tuple[0], ctx)}: ${mergectx(tuple[1], ctx)};`
+			`${tuple[0]}: ${tuple[1]};`
 		).join(seperator)
 	}
 	/**
@@ -39,7 +40,7 @@ module.exports = function ctxify(graph, ctx = {}){
 	 * so space only exists in <tagName> before each attribute
 	 */
 	function formatAttribute(prop, attribute){
-		return ` ${mergectx(prop, ctx)}="${mergectx(attribute, ctx)}"`
+		return ` ${prop}="${attribute}"`
 	}
 
  	var [element, props] = Object.entries(graph).pop()
@@ -49,16 +50,16 @@ module.exports = function ctxify(graph, ctx = {}){
  	for(var prop in props){
  		var attribute = props[prop]
  		if(element.toUpperCase() == 'STYLE'){
- 				innerHTML.push(`\n${mergectx(prop, ctx)}: {${formatStyleRules(attribute)}}\n`)
+ 				innerHTML.push(`\n${prop} {${formatStyleRules(attribute)}}\n`)
  		} else switch(prop){
  			case 'textContent':
- 				innerHTML.push(mergectx(attribute, ctx))
+ 				innerHTML.push(attribute)
  				break
  			case 'style':
  				outerHTML.push(formatAttribute('style', formatStyleRules(attribute)))
  				break
  			case 'childNodes':
- 				innerHTML.push(...attribute.map(child => ctxify(child, ctx)))
+ 				innerHTML.push(...attribute.map(child => ctxify(child)))
  				break
  			default:
  				outerHTML.push(formatAttribute(prop, attribute))
