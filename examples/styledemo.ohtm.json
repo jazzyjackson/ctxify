@@ -1,0 +1,35 @@
+{ "html": {
+	"childNodes": [
+		{"head":{
+			"childNodes": [
+				{"style": {
+					"#{{data.innerdata.id}}": {
+						"width": "{{style.width}}px",
+						"height": "{{style.height}}px",
+						"padding": "10px",
+						"border": "1px solid black",
+						"example-undefined": "{{data.non.existant}}"
+					},
+					"button": {},
+					"button#button-one": {}
+				}}
+			]
+		}},
+		{"body":{
+			"id": "{{data.innerdata.id}}",
+			"textContent": "Here is some text that will be displayed.",
+			"childNodes": [
+				{"button": {
+					"id": "button-one",
+					"onclick": "alert(`You've clicked ${this.id}`)",
+					"textContent": "1"
+				}},
+				{"button": {
+					"id": "button-two",
+					"onclick": "alert(`You've clicked ${this.id}`)",
+					"textContent": "2"
+				}}
+			]
+		}}
+	]
+}}
