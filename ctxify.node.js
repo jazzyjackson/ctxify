@@ -11,7 +11,7 @@ let validateGraph = require('./bin/validateGraph')
 module.exports = function ctxify(graph, ctx = {}){
 	// if graph is a string, try to open it, hoping its a JSON file.
 	// boy relative paths will get really screwy, should I do something to resolve them?
-	if(graph instanceof String){
+	if(typeof graph == 'string'){
 		try {
 			return ctxify(require(graph), ctx)
 		} catch(e) {
