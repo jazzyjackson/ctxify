@@ -8,36 +8,37 @@
  * The context object is traversed for the provided key name until it reaches
  * the end of the dot-notation-string OR the new context becomes undefined.
  */
-module.exports = function mergectx(graph, ctx){
+
+// this can be updated to async - just have to do an ugly 'await Promise.all(graph.map())'
+
+module.exports = function interpolate(graph, ctx){
 	let fragment = {}
 	for(var oldKey in graph){
-		let newKey = interpolatectx(oldKey, ctx)
+		let newKey = expand(oldKey, ctx)
 		switch(Object.prototype.toString.call(graph[oldKey])){
 			case '[object String]':
-				fragment[newKey] = interpolatectx(graph[oldKey], ctx)
+				fragment[newKey] = expand(graph[oldKey], ctx)
 				break
 			case '[object Array]':
-				fragment[newKey] = graph[oldKey].map(each => mergectx(each, ctx))
+				fragment[newKey] = graph[oldKey].map(each => interpolate(each, ctx))
 				break
 			case '[object Object]':
-				fragment[newKey] = mergectx(graph[oldKey], ctx)
+				fragment[newKey] = interpolate(graph[oldKey], ctx)
 				break
 		}
 	}
 	return fragment
 }
 
-
-
-function interpolatectx(str, ctx){
-	let capture = /{{([a-zA-Z0-9.]+)}}/g
-	let interpolate = (match, captured) => {
+// this is gonna get a lot more complicated.
+// I'm gonna have to search object keys for 'some.assumed.array[]' and repeat the pattern inside for each element.
+function expand(str, ctx){
+	return str.replace(/{{([a-zA-Z0-9.]+)}}/g, (match, captured) => {
 		let localctx = Object.assign({}, ctx) // create copy of ctx
 		let keys = captured.split('.')
 		while(keys.length && localctx){
 			localctx = localctx[keys.shift()] 
 		}
 		return localctx
-	}
-	return str.replace(capture, interpolate)
+	})
 }

@@ -1,6 +1,8 @@
 
-let mergectx = require('./bin/mergectx')
-let validateGraph = require('./bin/validateGraph')
+const link        = require('./bin/link.js')
+const validate    = require('./bin/validate.js')
+const interpolate = require('./bin/interpolate.js')
+const renderHTML  = require('./bin/renderHTML.js')
 
 /**
  * @exports ctxify
@@ -8,62 +10,13 @@ let validateGraph = require('./bin/validateGraph')
  * @param {object} context - a context object to access for interplated variables
  */
 
-module.exports = function ctxify(graph, ctx){
-	// if graph is a string, try to open it, hoping its a JSON file.
-	// boy relative paths will get really screwy, should I do something to resolve them?
-	if(typeof graph == 'string'){
-		try {
-			return ctxify(require(graph), ctx)
-		} catch(e) {
-			return `<!-- ${e.toString()} -->`
-		}
-	}
- 	validateGraph(graph) // throws error if not {element: {attributes}} format // maybe validateGraph can replace s
- 	if(ctx) graph = mergectx(graph, ctx)
-	/**
-	 * @param {object} style
-	 * @return {string}
-	 * Take object of form {width: "100px", height: "50px"}
-	 * and return a string `width: 100px; height: 50px;`
-	 * These values ARE compatible with {{ }} templating
-	 */
-	function formatStyleRules(style, seperator = ' '){
-		return Object.entries(style).map(tuple =>
-			`${tuple[0]}: ${tuple[1]};`
-		).join(seperator)
-	}
-	/**
-	 * @param {string} prop
-	 * @param {string} attribute
-	 * @return {string}
-	 * the leading space is intentional by the way,
-	 * so space only exists in <tagName> before each attribute
-	 */
-	function formatAttribute(prop, attribute){
-		return ` ${prop}="${attribute}"`
-	}
-
- 	var [element, props] = Object.entries(graph).pop()
-	var outerHTML = new Array
-	var innerHTML = new Array
-
- 	for(var prop in props){
- 		var attribute = props[prop]
- 		if(element.toUpperCase() == 'STYLE'){
- 				innerHTML.push(`\n${prop} {${formatStyleRules(attribute)}}\n`)
- 		} else switch(prop){
- 			case 'textContent':
- 				innerHTML.push(attribute)
- 				break
- 			case 'style':
- 				outerHTML.push(formatAttribute('style', formatStyleRules(attribute)))
- 				break
- 			case 'childNodes':
- 				innerHTML.push(...attribute.map(child => ctxify(child)))
- 				break
- 			default:
- 				outerHTML.push(formatAttribute(prop, attribute))
- 		}
-	}
-	return `<${element}${outerHTML.join(' ')}>${innerHTML.join('')}</${element}>`
+function ctxify(graph, ctx){
+	// -> link            // re-attach JSON files references as childNodes
+	//   -> validate      // walk the entire graph checking that types look as expected
+	//     -> interpolate // merge the ctx with the validated & linked graph
+	//       -> render    // walk the entire graph and return a string of HTML
+	return renderHTML(interpolate(validate(link(graph)),ctx))
+	//                      \_ interpolate(graph , ctx)_/
 }
+
+module.exports = {link, validate, interpolate, renderHTML, ctxify}
