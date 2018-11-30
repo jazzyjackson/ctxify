@@ -8,15 +8,15 @@
 		},
 		"textContent": "Here is some text that will be displayed.",
 		"childNodes": [
-			"filepathtosomeotherfig", <- interpreted as JSON root of a new graph. will be interpoalted in position.
-			{"SomeOtherHTML": {
+			"filepathtosomeotherfig",
+			{"{{#if data}}":{"h3": {
 				"bundle":"@mixint/someOtherGraphRoot"
-			}},
-			{"button": {
+			}}},
+			{"{{#each data.in}}": {"li": {
 				"id": "button-one",
 				"onclick": "alert(`You've clicked ${this.id}`)",
 				"textContent": "1"
-			}},
+			}}},
 			{"button": {
 				"id": "button-two",
 				"onclick": "alert(`You've clicked ${this.id}`)",
