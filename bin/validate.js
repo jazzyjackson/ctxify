@@ -3,7 +3,7 @@ const assert = require('assert')
 /**
  * @param {object} graph
  */
-module.exports = function validateGraph(graph, position){
+module.exports = function validate(graph, position){
 	// initialize position if it doesn't already exist in context from previous recursion
 	var position = position || new Array
 
@@ -90,7 +90,7 @@ module.exports = function validateGraph(graph, position){
 
 	var validateChildren = children => {
 		typeEqual(children, 'Array')
-		children.forEach(child => validateGraph(child, position))
+		children.forEach(child => validate(child, position))
 	}
 
 	typeEqual(graph, 'Object')
@@ -111,4 +111,5 @@ module.exports = function validateGraph(graph, position){
 		validateHTMLTag(element, props)
 
 	position.pop()
+	return graph // didn't modify it, just want to hand it to the next function given that all assertions passed.
 }
