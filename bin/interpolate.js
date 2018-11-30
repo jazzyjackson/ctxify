@@ -42,3 +42,12 @@ function expand(str, ctx){
 		return localctx
 	})
 }
+/*
+// capture keyword [[each, if]]
+{{#(\w)\s([a-zA-Z0-9.]+)}}}}
+
+return an empty object for failed conditionals, return array of nodes for loops...
+
+will have to revamp the switch case above: when I grab a key, I have to check if its a tagName or a #(){}...
+
+*/
