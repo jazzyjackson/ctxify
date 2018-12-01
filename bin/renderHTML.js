@@ -26,6 +26,9 @@ module.exports = function renderHTML(graph){
 	var outerHTML = new Array
 	var innerHTML = new Array
 
+	if(element == '!')
+		return `<!-- ${props} -->\n`
+
  	for(var prop in props){
  		var attribute = props[prop]
  		if(element.toUpperCase() == 'STYLE'){
