@@ -8,5 +8,8 @@
   },
   "repository": "https://github.com/jazzyjackson/ctxify.git",
   "author": "Colten Jackson <jazzyjackson@gmail.com>",
-  "license": "SEE LICENSE IN CONTINUITY.LICENSE"
+  "license": "SEE LICENSE IN CONTINUITY.LICENSE",
+  "dependencies": {
+    "@mixint/figjam": "^1.0.0"
+  }
 }
