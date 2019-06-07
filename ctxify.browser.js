@@ -28,7 +28,7 @@ window.ctxify = function(graph, ctx){
             case 'childNodes':
                 Array.isArray(newValue) && newValue.filter(Boolean).forEach(child => {
                     //node.child[ get tagname of node ] 
-                    let newChild = child instanceof Element ? child : mixint.createElement(child)
+                    let newChild = child instanceof Element ? child : ctxify(child)
                     node.child[newChild.tagName] = newChild
                     node.appendChild(newChild)
                 })
